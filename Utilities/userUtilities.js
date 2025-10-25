@@ -17,6 +17,10 @@ const generateJWTToken = (userId) => {
     return token
 }
 
+const validateJWT = (token) => {
+    const payload = jwt.verify(token,process.env.SECRETKEY)
+    return payload
+}
 
 
-module.exports = {generateHashAndSalt,generateJWTToken,generateHashForPassword}
+module.exports = {generateHashAndSalt,generateJWTToken,generateHashForPassword,validateJWT}
