@@ -10,6 +10,10 @@ const saveUrlToDB = async (req,res) => {
          console.log(validationResult)
          if(validationResult.success){
             const {targetUrl,shortCode} = validationResult.data
+            const isGivenUrlAlreadyExist = await urlModel.checkIfGivenUrlAlreadyExist(targetUrl)
+            if(isGivenUrlAlreadyExist){
+                return res.status(400).json({isSuccess:false,message:"The given url already exist"})
+            }
             const urlData = {
                 targetURL: targetUrl,
                 shortCode: shortCode ??  nanoid(4),
@@ -52,4 +56,32 @@ const redirectToTargetUrl = async(req,res) => {
     }
 }
 
-module.exports = {saveUrlToDB,redirectToTargetUrl}
+
+const getAllCodes = async (req,res) => {
+    const userId = req.user.id
+    try{
+        const shortCodes = await urlModel.getAllShortCodesForGivenUserId(userId)
+        res.status(200).json({isSuccess:true,shortCodes})
+    }
+    catch(error){
+        console.log(error)
+        res.status(500).json({isSuccess:false,message:"Internal server error"})
+
+    }
+}
+
+
+const deleteCodesWithId = async (req,res) => {
+    const userId = req.user.id 
+    const {shortCode} = req.body
+    try{
+       await urlModel.deleteUrlDataForGivenUserId(userId,shortCode)
+       res.status(200).json({isSuccess:true,message:"The url data is deleted"})
+    }
+    catch(error){
+        console.log(error)
+        res.status(500).json({isSuccess:false,message:"Internal server error"})
+    }
+}
+
+module.exports = {saveUrlToDB,redirectToTargetUrl,getAllCodes,deleteCodesWithId,deleteCodesWithId}
